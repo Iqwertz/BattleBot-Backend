@@ -143,11 +143,15 @@ function deleteUser(user: any) {
 }
 
 function removeUserFromLobby(lobbyId: string, uid: string) {
-  lobbyRef.child(lobbyId).child("player").child(uid).remove();
+  if (lobbyId.length > 0 && uid.length > 0) {
+    lobbyRef.child(lobbyId).child("player").child(uid).remove();
+  }
 }
 
 function removeUserFromGame(lobbyId: string, uid: string) {
-  gamesRef.child(lobbyId).child("playerBots").child(uid).remove();
+  if (lobbyId.length > 0 && uid.length > 0) {
+    gamesRef.child(lobbyId).child("playerBots").child(uid).remove();
+  }
 }
 
 function formatUserToMap(obj: any): Map<string, any> {
