@@ -12,9 +12,35 @@ const maxUserOffTime = 3000;
 
 var userCheckInterval = 2000;
 
+var cleanUpInterval = 300000;
+
 setInterval(() => {
   checkUser();
 }, userCheckInterval);
+
+setInterval(() => {
+  cleanUp();
+}, cleanUpInterval);
+
+function cleanUp() {
+  var ref = db.ref("games");
+  ref.once("value", function (snapshot: any) {
+    //console.log(snapshot.val());
+    let mappedGames = formatUserToMap(snapshot.val());
+    mappedGames.forEach((game, key) => {
+      gameHasLobby(game, key);
+    });
+  });
+
+  var lRef = db.ref("lobbys");
+  lRef.once("value", function (snapshot: any) {
+    //console.log(snapshot.val());
+    let mappedLobbys = formatUserToMap(snapshot.val());
+    mappedLobbys.forEach((lobby, key) => {
+      checkPlayerInLobby(lobby);
+    });
+  });
+}
 
 var db = admin.database();
 var lobbyRef = db.ref("lobbys");
@@ -31,9 +57,9 @@ lobbyRef.on(
 );
 
 function checkPlayerInLobby(lobby: any): boolean {
-  console.log(lobby);
   if (!lobby.player) {
     removeLobby(lobby.settings.id);
+    removeGame(lobby.settings.id);
     return false;
   }
   return true;
@@ -42,12 +68,8 @@ function checkPlayerInLobby(lobby: any): boolean {
 function checkAdminInLobby(lobby: any) {
   let mappedPlayer = formatUserToMap(lobby.player);
   let admin = lobby.adminUid;
-  console.log(admin);
-  console.log(lobby);
-  console.log(mappedPlayer);
   if (!mappedPlayer.has(admin)) {
     let newAdmin = getRandomKey(mappedPlayer);
-    console.log(newAdmin);
     lobbyRef.child(lobby.settings.id).update({ adminUid: newAdmin });
   }
 }
@@ -67,14 +89,22 @@ gamesRef.on(
   }
 );
 
-function gameHasLobby(game: any) {
-  // lobbyRef.child(game.)
+function gameHasLobby(game: any, id: string) {
+  var lobbyIdRef = db.ref("lobbys/" + id);
+  lobbyIdRef.once("value", function (snapshot: any) {
+    if (!snapshot.val()) {
+      removeGame(id);
+    }
+  });
+}
+
+function removeGame(id: string) {
+  gamesRef.child(id).remove();
 }
 
 function checkUser() {
   var userRef = db.ref("user");
   userRef.once("value", function (snapshot: any) {
-    //console.log(snapshot.val());
     let mappedUser = formatUserToMap(snapshot.val());
     mappedUser.forEach((user) => {
       checkLastOnline(user);

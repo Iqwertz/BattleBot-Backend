@@ -8,7 +8,6 @@
   "name": "battlebot-backend",
   "version": "1.0.0",
   "main": "src/index.ts",
-  "devDependencies": {},
   "scripts": {
     "start:staging": "ts-node src/index.ts",
     "start": "nodemon src/index.ts"
