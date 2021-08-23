@@ -8,9 +8,9 @@ admin.initializeApp({
     "https://battlebots-30657-default-rtdb.europe-west1.firebasedatabase.app",
 });
 
-const maxUserOffTime = 3000;
+const maxUserOffTime = 6000;
 
-var userCheckInterval = 2000;
+var userCheckInterval = 3000;
 
 var cleanUpInterval = 300000;
 
